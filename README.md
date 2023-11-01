@@ -1,7 +1,7 @@
 
 # Monster Catalog and Dungeon in C++
 
-This project aims to implement the knowledge obtained about search algorithms and data structure. This project is made in C++, its objective is and consists of a system that creates a catalog of monsters and then fills a dungeon with random monsters from that catalog. This documentation describes how the code works and how you can use it.
+This project aims to implement the knowledge obtained about search algorithms and data structure, also is presented the UML diagram to show how OOP has been aplicated. This project is made in C++, its objective is and consists of a system that creates a catalog of monsters and then fills a dungeon with random monsters from that catalog. This documentation describes how the code works and how you can use it.
 
 ## Repository Content
 
