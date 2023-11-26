@@ -1,5 +1,7 @@
 #include <iostream>
-#include "catalogo.h"
+#include "grafo.h"
+#include "catalogo.h" 
+#include <string> 
 using namespace std;
 
 class Cuarto {
@@ -7,33 +9,86 @@ private:
     Monstruo monstruo; //Esto declara un miembro de datos llamado monstruo que es una instancia de la clase Monstruo.
 public:
     Cuarto() {}  //La clase contiene dos constructores, uno que tomo a un monstruo como elemento y otra que no.
-    Cuarto(Monstruo _monstruo) : monstruo(_monstruo) {}
-    Monstruo getMonstruo() {
+    Cuarto(const Monstruo _monstruo) : monstruo(_monstruo) {}
+
+    const Monstruo& getMonstruo() const {
         return monstruo;
     }
+    // definimos el overloader
 
+    friend std::ostream& operator<<(std::ostream& os, const Cuarto& cuarto) {
+        os << "Cuarto con " << cuarto.getMonstruo();
+        return os;
+    }
 };
 
 
 class Dungeon {
 private:
-    Lista<Cuarto> listaCuartos; //Representa un calabozo. Es un template y se espera que se le proporcione un tipo concreto (como Cuarto) cuando se instancia.
-
+    Graph<Cuarto> grafoCuartos;
+    Lista<unsigned int> path; 
 public:
     Dungeon() {}
 
-    bool createRoom(Cuarto cuarto) {
-        listaCuartos.InsertarNodo(cuarto); //Usamos las funciones de nuestro nodos.h
+    bool createDungeon(string filename){
+        if(grafoCuartos.loadFile("dungeon.txt")){
+            return true;
+        }
+        return false;
+    }
+
+    int getSize(){
+        return grafoCuartos.getnSize();
+    }
+
+    bool createRoom(unsigned int c, Cuarto cuarto){
+        if(grafoCuartos.setVertex(c, cuarto)){
+            return true;
+        }
+        else{
+            cout << "No se pudieron insertar datos en el cuarto" << endl;
+            return false;
+        }        
+    }
+
+    void imprimeCuartos(){
+        grafoCuartos.print();
+    }
+
+    bool trazaRuta(unsigned int inicio, unsigned int fin) {
+        if (grafoCuartos.BFS(inicio, fin)) {
+            path = *grafoCuartos.getPath();
+            
+            if (!path.IsEmpty()) {
+                std::cout << "Camino encontrado: ";
+                path.imprimir();
+                return true;
+            } else {
+                std::cout << "No se encontró un camino." << std::endl;
+                return false;
+            }
+        } else {
+            std::cout << "Error al buscar la ruta." << std::endl;
+            return false;
+        }
+    }
+
+    Cuarto* cuartoActualRuta() {
+        if (!path.IsEmpty()) {
+            unsigned int topIndex = path.GetHead()->info;
+            return &grafoCuartos.getVertex(topIndex).data;
+        }
+        return nullptr;
+    }
+
+    bool avanzaRuta() {
+        
+        if (!path.IsEmpty()) {
+            path.eliminartail();
+            return true;
+        }
+        return false;
         return true;
-        }
-
-    void imprimeCuartos() {
-        NodoLista<Cuarto>* actual = listaCuartos.GetHead(); //Tuvimos que implementar la función GetHead en nuestra DLlist
-        while (actual != nullptr) {
-            Monstruo monstruo = actual->info.getMonstruo();
-            cout << "Cuarto con Monstruo: " << monstruo.getNombre() << endl;
-            actual = actual->next;
-        }
-    };
-
+    }
 };
+
