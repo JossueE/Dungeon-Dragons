@@ -1,3 +1,5 @@
+#ifndef NODOS_H
+#define NODOS_H
 #include <iostream>
 using namespace std;
 
@@ -16,23 +18,17 @@ class Lista{
     private:
         NodoLista<T> *head;
         NodoLista<T> *tail;
+        int size;
 
     public:
         Lista(){
             head = nullptr;
-            tail = nullptr;   
+            tail = nullptr;
+            size = 0;   
         }
 
         ~Lista(){
-            NodoLista<T> *actual = nullptr;
-            NodoLista<T> *eliminar = nullptr;
-            actual = head;
-            
-            while(actual){
-                eliminar = actual;
-                actual = actual -> next;
-                delete eliminar;
-            }
+            borrar();
         };
 
         bool InsertarNodo(T dato){
@@ -49,21 +45,12 @@ class Lista{
             }
             NuevoNodo -> next = head;
             head = NuevoNodo;
+            size++;
             return true;
         }
 
         int Size (){
-            NodoLista<T> *actual = head;
-
-            if(head == nullptr){
-                return 0;
-            }
-            int count = 0;
-            while(actual -> next != nullptr){
-                actual = actual -> next;
-                count ++;
-            }
-            return count;
+            return size;
         }
 
         bool InsertarTail(T dato){
@@ -72,6 +59,7 @@ class Lista{
                 head = NuevoNodo;
                 head -> next = nullptr;
                 head -> prev = nullptr;
+                size++;
                 return true;
             }
 
@@ -83,6 +71,7 @@ class Lista{
             actual -> next = NuevoNodo;
             actual -> prev = actual;
             NuevoNodo -> next = nullptr;
+            size++;
             return true;
         }
 
@@ -90,27 +79,28 @@ class Lista{
             NodoLista<T> *actual = head;
 
             while(actual != nullptr){
-                cout << actual -> info << " " << endl;
+                cout << actual -> info << " ";
                 actual = actual -> next;
             }
+            cout << endl;
         }
 
-        NodoLista<T>* GetNodoEnPos(int posicion) {
-        // Verifica si la posición está dentro de los límites de la lista
-        if (posicion < 0 || posicion >= Size()) {
-            return nullptr; // Posición fuera de rango
-        }   
+        NodoLista<T>* GetNodoEnPos(unsigned int posicion) {
+            // Verifica si la posición está dentro de los límites de la lista
+            if (posicion < 0 || posicion >= Size()) {
+                return nullptr; // Posición fuera de rango
+            }   
 
-        NodoLista<T>* nodoActual = head;
-        int indice = 0;
+            NodoLista<T>* nodoActual = head;
+            int indice = 0;
 
-        // Avanzar a través de la lista hasta llegar a la posición deseada
-        while (nodoActual && indice < posicion) {
-            nodoActual = nodoActual->next;
-            indice++;
-        }
+            // Avanzar a través de la lista hasta llegar a la posición deseada
+            while (nodoActual && indice < posicion) {
+                nodoActual = nodoActual->next;
+                indice++;
+            }
 
-        return nodoActual;
+            return nodoActual;
         }
 
         NodoLista<T>* buscar(T dato){
@@ -126,7 +116,7 @@ class Lista{
             return nullptr;
         }
 
-        NodoLista<T>* GetHead(){
+        NodoLista<T>* GetHead() const {
             if(head == nullptr){
                 return nullptr;
             }
@@ -146,38 +136,28 @@ class Lista{
             * Complejidad: O(n)
             *
             */
-            NodoLista<T> *actual = head;
-            NodoLista<T> *temporal = nullptr;
-            NodoLista<T> *anterior = nullptr;
+            NodoLista<T> *actual = nullptr;
 
-            if(!head){
+            actual = head;
+            while(actual && actual->info != dato)
+                actual = actual->next;
+
+            if(!actual)
                 return false;
-            }
-            if(head -> info == dato){
-                temporal = head -> next;
-                if (temporal) {
-                    temporal->prev = nullptr;
-                }
-                delete head;
-                head = temporal;
-                return true;
-            }
 
-            while (actual){
-                if(actual -> info == dato){
-                    temporal = actual->next;
-                    if (temporal) {
-                        temporal->prev = anterior;
-                    }
-                    anterior->next = temporal;
-                    delete actual;
-                    return true;
-                }
+            if(actual->prev)
+                actual->prev->next = actual->next;
+            if(actual->next)
+                actual->next->prev = actual->prev;
 
-                anterior = actual;
-                actual = actual -> next;
-            }
+            if(actual == head)
+                head = actual->next;
+
+            delete actual;
+            size --;
             return true;
+
+            
         }
 
         bool eliminarhead(){
@@ -191,19 +171,20 @@ class Lista{
             * Complejidad: O(1)
             *
             */
-            
+            NodoLista<T> *temporal = head -> next;
+
             if(!head){
                 return false;
             }
             
             else {
-                NodoLista<T> *temporal = head -> next;
-                if (temporal) {
+                
+                if(temporal) {
                     temporal->prev = nullptr;
                 }
-
                 delete head;
                 head = temporal;
+                size--;
                 return true;
             }
         }
@@ -228,6 +209,7 @@ class Lista{
             if (!head->next) {
                 delete head;
                 head = nullptr;
+                size--;
                 return true;
             }
 
@@ -239,10 +221,11 @@ class Lista{
             tail = anterior;
 
             delete ultimo;
+            size--;
             return true;
         }
 
-        bool IsEmpty(){
+        bool IsEmpty() const {
             if (head == nullptr){
                 return true;
             }
@@ -252,10 +235,57 @@ class Lista{
             
         }
 
-        void BorrarElementos(){
-            delete this;
+        void borrar(){
+            while(head) {
+                NodoLista<T> *siguiente = nullptr;
+
+                siguiente = head->next;
+                delete head;
+                head = siguiente;
+            }
+            size = 0;
         }
+
+
+
+    class iterator {
+    public:
+        iterator(NodoLista<T>* node) : current(node) {}
+
+        T& operator*() {
+            return current->info;
+        }
+
+        iterator& operator++() {
+            if(current)
+                current = current->next;
+            return *this;
+        }
+
+        bool operator==(const iterator& other) const {
+            return current == other.current;
+        }
+
+        bool operator!=(const iterator& other) const {
+            return current != other.current;
+        }
+
+    private:
+        NodoLista<T>* current;
+    };
+
+    iterator begin() {
+        return iterator(head);
+    }
+
+    iterator end() {
+        return iterator(nullptr);
+    }
+    
 };
+
+
+#endif
 
 
     
