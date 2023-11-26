@@ -56,9 +56,7 @@ public:
             int hp = stoi(tokens[5]);
             string align = tokens[6];
 
-            Monstruo monstruo;
-            monstruo.assignAtributes(name, cr, type, size, ac, hp, align);
-
+            Monstruo monstruo(name, cr, type, size, ac, hp, align);
             monstruos.InsertarNodo(monstruo);
         }
 
@@ -80,10 +78,12 @@ public:
             }
         }
         // Si no se pudo seleccionar un monstruo aleatorio, se retorna un Monstruo vacio
-        return new Monstruo();
+        cerr << "Error al seleccionar un monstruo aleatorio." << endl;
+        return nullptr;
     }
 };
 
 
 #endif // CATALOGO_H
+
 
